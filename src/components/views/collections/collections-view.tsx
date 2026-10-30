@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCreateCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -21,12 +21,14 @@ export function CollectionsView(_props: ViewProps) {
 	// Obtener las colecciones del store
 	const collections = getCollections();
 
+	// Fetch once per mount: an empty library stays empty after loading, so emptiness alone would refetch forever.
+	const hasRequestedCollections = useRef(false);
 	useEffect(() => {
-		if (collections.length === 0 && !isLoading) {
-			viewLogger.info('🔄 Collection store is empty, loading from the server...');
-			fetchCollections();
-		}
-	}, [collections.length, isLoading, fetchCollections]);
+		if (hasRequestedCollections.current || collections.length > 0) return;
+		hasRequestedCollections.current = true;
+		viewLogger.info('🔄 Collection store is empty, loading from the server...');
+		fetchCollections();
+	}, [collections.length, fetchCollections]);
 
 	const handleCollectionClick = useCallback(
 		(collection: CollectionWithStats) => {
@@ -47,11 +49,15 @@ export function CollectionsView(_props: ViewProps) {
 			// });
 			return;
 		}
-		createCollection({ name: newCollectionName, description: newCollectionDescription });
+		// The view reads the collection store; the React Query mutation does not update it.
+		createCollection(
+			{ name: newCollectionName, description: newCollectionDescription },
+			{ onSuccess: () => void fetchCollections() }
+		);
 		setNewCollectionName('');
 		setNewCollectionDescription('');
 		setShowForm(false);
-	}, [newCollectionName, newCollectionDescription, createCollection]);
+	}, [newCollectionName, newCollectionDescription, createCollection, fetchCollections]);
 
 	return (
 		<CollectionsContentView

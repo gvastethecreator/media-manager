@@ -5,6 +5,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast as sonnerToast } from 'sonner';
 import { useToast } from '@/components/ui/use-toast';
 import type { MediaAssetReference } from '@/lib/api/authorized-roots';
 import { apiClient } from '@/lib/api/client';
@@ -22,6 +23,18 @@ export interface MoveFilesOptions {
 	assets: MediaAssetReference[];
 	/** ID de la carpeta destino */
 	targetFolderId: string;
+	/** Folder each asset came from, keyed by assetId. Enables Undo, which moves the assets back. */
+	sourceFolderIds?: Record<string, string>;
+}
+
+function groupBySourceFolder(assets: MediaAssetReference[], sourceFolderIds: Record<string, string>) {
+	const groups = new Map<string, MediaAssetReference[]>();
+	for (const asset of assets) {
+		const folderId = sourceFolderIds[asset.assetId];
+		if (!folderId) return null;
+		groups.set(folderId, [...(groups.get(folderId) ?? []), asset]);
+	}
+	return groups;
 }
 
 export interface UseMoveResult {
@@ -91,6 +104,24 @@ export function useMove(): UseMoveResult {
 			}
 
 			const reconciliation = pendingFileMutationDescription(summary);
+			const undoGroups =
+				!reconciliation && variables.sourceFolderIds ? groupBySourceFolder(assets, variables.sourceFolderIds) : null;
+			if (undoGroups) {
+				sonnerToast.success('Files moved', {
+					description: `${assets.length} ${assets.length === 1 ? 'file was' : 'files were'} moved${reindexed ? ' and reindexed' : '; reindex is still pending'}`,
+					action: {
+						label: 'Undo',
+						onClick: () => {
+							void (async () => {
+								for (const [folderId, groupAssets] of undoGroups) {
+									await mutation.mutateAsync({ assets: groupAssets, targetFolderId: folderId });
+								}
+							})().catch((error) => clientLogger.error('Undo move failed:', error));
+						},
+					},
+				});
+				return;
+			}
 			toast(
 				reconciliation
 					? { title: 'Move applied with pending tasks', description: reconciliation }

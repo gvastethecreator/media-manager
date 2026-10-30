@@ -76,9 +76,16 @@ export function useAlbumRecentMedia(albumId: string, limit = 6) {
 	>({
 		queryKey: [...albumKeys.detail(albumId), 'recent-media', limit],
 		queryFn: () =>
-			apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>>(
-				`/albums/${albumId}/recent-media?limit=${limit}`
-			),
+			// The server exposes card previews through the images endpoint.
+			apiClient
+				.get<Array<{ id: string; name?: string | null }>>(`/albums/${albumId}/images?limit=${limit}`)
+				.then((images) =>
+					images.map((image) => ({
+						id: image.id,
+						name: image.name,
+						thumbnailUrl: `/api/images/${encodeURIComponent(image.id)}/thumbnail`,
+					}))
+				),
 		enabled: !!albumId,
 	});
 }

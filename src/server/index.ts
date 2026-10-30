@@ -18,6 +18,7 @@ import {
 	MAX_REQUEST_BODY_BYTES,
 } from '@/runtime/http-limits';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
+import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, logWarning, requestLogger } from './middleware/logging';
 import { publicErrorHandler } from './middleware/public-error-handler';
@@ -32,6 +33,8 @@ import { sanitizeJsonResponses } from './security/sanitize-public-payload';
 const app = express();
 let runtimeHealthStatus: RuntimeHealthStatus = 'starting';
 await ensureDatabaseReady();
+// Favorites and settings resolve the active profile; a new library has none until one is created here.
+await ensureDefaultProfile();
 app.locals.authorizedRootRegistry = await createAuthorizedRootRegistryFromEnvironment();
 await syncCanonicalMediaRoots(app.locals.authorizedRootRegistry);
 const mutationRecovery = await reconcilePendingFileMutations(app.locals.authorizedRootRegistry);
@@ -71,7 +74,8 @@ const apiLimiter = rateLimit({
 	max: 1000, // Límite generoso para app local
 	standardHeaders: true,
 	legacyHeaders: false,
-	skip: () => process.env.NODE_ENV === 'development',
+	// Media grids issue one read per thumbnail; only mutations count against the limit.
+	skip: (request) => process.env.NODE_ENV === 'development' || request.method === 'GET' || request.method === 'HEAD',
 	message: { error: 'Too many requests, please try again later.' },
 });
 app.use(requestLogger as RequestHandler);

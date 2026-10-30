@@ -841,6 +841,7 @@ async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, director
 		await rename(pendingControlPath, controlPath);
 		const deleterExitCode = await waitForNativeHelperExit(deleter, 30_000);
 		if (deleterExitCode === undefined) {
+			console.error(`El deleter nativo no terminó dentro del plazo: ${directory}`);
 			if (process.platform === 'win32') {
 				await stopWindowsHelperAsFallback(deleter);
 			} else {
@@ -849,10 +850,12 @@ async function deleteOwnedDirectoryWithStableIdentity(testRoot: string, director
 			return false;
 		}
 		if (!interlockPassed || deleterExitCode !== 0) {
+			if (interlockPassed) console.error(`El deleter nativo terminó con código ${deleterExitCode}: ${directory}`);
 			return false;
 		}
 		try {
 			await lstat(directory);
+			console.error(`El directorio temporal sigue existiendo tras el borrado: ${directory}`);
 			return false;
 		} catch (error) {
 			return getErrorCode(error) === 'ENOENT';

@@ -250,13 +250,17 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 	const handleReindexFolder = useCallback(
 		async (folderId: string) => {
 			setReindexingFolderId(folderId);
+			const reindexStore = useReindexStore.getState();
 			try {
-				useReindexStore.getState().setOpen(true);
-				await reindexFolderMutation.mutateAsync({ id: folderId });
-				toastService.success('Folder reindexed successfully');
+				reindexStore.setOpen(true);
+				reindexStore.setRunningFolderId(folderId);
+				const result = await reindexFolderMutation.mutateAsync({ id: folderId });
+				if (result.cancelled) toastService.info('Reindex stopped. Run it again to index the remaining folders.');
+				else toastService.success('Folder reindexed successfully');
 			} catch (err) {
-				toastService.error('Could not reindex folder');
+				toastService.error(`Could not reindex folder: ${err instanceof Error ? err.message : 'unknown error'}`);
 			} finally {
+				useReindexStore.getState().setRunningFolderId(null);
 				setReindexingFolderId(null);
 			}
 		},

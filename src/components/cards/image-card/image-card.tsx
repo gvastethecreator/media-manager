@@ -56,7 +56,7 @@ export const ImageCard = memo(function ImageCard({
 				</div>
 			) : (
 				<img
-					alt={`Image ${imageId}`}
+					alt={`Item ${imageId}`}
 					className="h-full w-full object-cover"
 					height="200"
 					loading="lazy"

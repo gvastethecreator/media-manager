@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
 import {
 	type CreateProfileInput,
 	type ProfileExtended,
@@ -114,10 +113,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 	// Cargar perfiles
 	const loadProfiles = useCallback(async () => {
 		try {
-			// Asegurar que existe al menos un perfil por defecto
-			await ensureDefaultProfile();
-
-			// Cargar perfiles después de asegurar que existe al menos uno
+			// The server creates the default profile at startup.
 			const profiles = await profileClient.getProfiles();
 
 			// Encontrar el perfil activo (debería existir al menos uno)
@@ -182,46 +178,55 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		localStorage.removeItem('appSettings');
 	}, []);
 
-	const updateProfile = useCallback(async (id: string | null, data: CreateProfileInput | UpdateProfileInput) => {
-		try {
-			if (id) {
-				await profileClient.updateProfile(id, data as UpdateProfileInput);
-			} else {
-				await profileClient.createProfile(data as CreateProfileInput);
+	const updateProfile = useCallback(
+		async (id: string | null, data: CreateProfileInput | UpdateProfileInput) => {
+			try {
+				if (id) {
+					await profileClient.updateProfile(id, data as UpdateProfileInput);
+				} else {
+					await profileClient.createProfile(data as CreateProfileInput);
+				}
+				// Recargar los perfiles para obtener la lista actualizada
+				await loadProfiles();
+				toastService.success(SETTINGS_TOASTS.profileUpdated);
+			} catch (err) {
+				console.error('Error updating profile:', err);
+				toastService.error(SETTINGS_TOASTS.profileUpdateFailed);
+				throw err;
 			}
-			// Recargar los perfiles para obtener la lista actualizada
-			await loadProfiles();
-			toastService.success(SETTINGS_TOASTS.profileUpdated);
-		} catch (err) {
-			console.error('Error updating profile:', err);
-			toastService.error(SETTINGS_TOASTS.profileUpdateFailed);
-			throw err;
-		}
-	}, [loadProfiles]);
+		},
+		[loadProfiles]
+	);
 
-	const setActiveProfile = useCallback(async (id: string) => {
-		try {
-			await profileClient.setActiveProfile(id);
-			await loadProfiles();
-			toastService.success(SETTINGS_TOASTS.activeProfileUpdated);
-		} catch (err) {
-			console.error('Error setting active profile:', err);
-			toastService.error(SETTINGS_TOASTS.activeProfileFailed);
-			throw err;
-		}
-	}, [loadProfiles]);
+	const setActiveProfile = useCallback(
+		async (id: string) => {
+			try {
+				await profileClient.setActiveProfile(id);
+				await loadProfiles();
+				toastService.success(SETTINGS_TOASTS.activeProfileUpdated);
+			} catch (err) {
+				console.error('Error setting active profile:', err);
+				toastService.error(SETTINGS_TOASTS.activeProfileFailed);
+				throw err;
+			}
+		},
+		[loadProfiles]
+	);
 
-	const deleteProfile = useCallback(async (id: string) => {
-		try {
-			await profileClient.deleteProfile(id);
-			await loadProfiles();
-			toastService.success(SETTINGS_TOASTS.profileDeleted);
-		} catch (err) {
-			console.error('Error deleting profile:', err);
-			toastService.error(SETTINGS_TOASTS.profileDeleteFailed);
-			throw err;
-		}
-	}, [loadProfiles]);
+	const deleteProfile = useCallback(
+		async (id: string) => {
+			try {
+				await profileClient.deleteProfile(id);
+				await loadProfiles();
+				toastService.success(SETTINGS_TOASTS.profileDeleted);
+			} catch (err) {
+				console.error('Error deleting profile:', err);
+				toastService.error(SETTINGS_TOASTS.profileDeleteFailed);
+				throw err;
+			}
+		},
+		[loadProfiles]
+	);
 
 	const value = useMemo(
 		() => ({

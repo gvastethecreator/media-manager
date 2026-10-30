@@ -1,15 +1,15 @@
 # Code map: media-manager
 
-Generated: 2026-10-07T05:11:59Z | Commit: `a7bf08028aab` | Schema: 2
-Generation: `e640b64030aeeebde1fda162dc13cd4e8f6b7707cb41bbf6feca44c8a488c6b2`
+Generated: 2026-10-30T18:58:40Z | Commit: `54a4ddc4353f` | Schema: 2
+Generation: `8f0ff9d1255ddf339d3bcd6e61f351b26555c4ad6d7ae49a45ed92da16a1f883`
 Scope: . | Inventory: working-tree
-Nodes: 1798 | Edges: 10524 | Flows: 5
+Nodes: 1797 | Edges: 10534 | Flows: 5
 
 ## Coverage
 
-- Analysis: **partial**; 1677 analyzed of 1684 included files.
+- Analysis: **partial**; 1676 analyzed of 1684 included files.
 - Configuration files: 1; omitted untracked files: 0.
-- Unresolved references and analysis limits: 9493.
+- Unresolved references and analysis limits: 9500.
 - Static references and call paths do not prove runtime execution or test coverage.
 
 ## Modules
@@ -34,7 +34,7 @@ Nodes: 1798 | Edges: 10524 | Flows: 5
 - `external:javascript:@electron/packager` | external | External | callers: scripts/desktop-package.ts | callees: none | tests: 0 | entry: none
 - `external:javascript:@gsap/react` | external | External | callers: src/components/settings/common/entity-settings-view.tsx, src/components/settings/common/entity-settings-view.tsx, src/components/settings/modern/files-settings-modern.tsx, src/components/settings/modern/files-settings-modern.tsx | callees: none | tests: 0 | entry: none
 - `external:javascript:@hookform/resolvers` | external | External | callers: src/components/settings/forms/create-character-form.tsx, src/components/settings/forms/create-character-form.tsx, src/components/settings/forms/create-collection-form.tsx, src/components/settings/forms/create-collection-form.tsx | callees: none | tests: 0 | entry: none
-- Showing 20 of 1798 nodes. Query `impact --module <path>` or open the HTML hierarchy for the rest.
+- Showing 20 of 1797 nodes. Query `impact --module <path>` or open the HTML hierarchy for the rest.
 
 ## Edges
 
@@ -88,7 +88,7 @@ Nodes: 1798 | Edges: 10524 | Flows: 5
 - `electron/main/index.ts` -> `external:javascript:node:fs` | imports
 - `electron/main/index.ts` -> `external:javascript:node:module` | calls
 - `electron/main/index.ts` -> `external:javascript:node:module` | imports
-- Showing 50 of 10524 edges; JSON contains every edge and its evidence.
+- Showing 50 of 10534 edges; JSON contains every edge and its evidence.
 
 ## Unknown
 
@@ -115,7 +115,7 @@ Nodes: 1798 | Edges: 10524 | Flows: 5
 
 ## Architecture changes
 
-- Nodes: +0 / -0; edges: +0 / -0.
+- Nodes: +0 / -1; edges: +18 / -8.
 - Boundary changes: 0; new cycles: 0.
 
 ## Read next

@@ -92,6 +92,11 @@ export async function generateStaticVideoThumbnailFFmpeg(
 			// Ignorar errores de limpieza
 		});
 
+		// A seek past the end of a short clip produces an empty file; retry from the first frame.
+		if (thumbnailBuffer.length === 0) {
+			return time > 0 ? generateStaticVideoThumbnailFFmpeg(videoPath, { ...options, time: 0 }) : null;
+		}
+
 		logger.info('Thumbnail generado con FFmpeg.', { bytes: thumbnailBuffer.length });
 		return thumbnailBuffer;
 	} catch (error) {
@@ -192,13 +197,13 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 			// Ignorar errores de limpieza
 		});
 
+		if (thumbnailBuffer.length === 0) {
+			return time > 0 ? generateAnimatedVideoThumbnailFFmpeg(videoPath, { ...options, time: 0 }) : null;
+		}
+
 		logger.info('Thumbnail animado generado con FFmpeg.', { bytes: thumbnailBuffer.length });
 		return thumbnailBuffer;
 	} catch (error) {
-		logger.error('Error generando thumbnail animado con FFmpeg.', {
-			errorKind: error instanceof Error ? error.name : 'UnknownError',
-		});
-
 		// Limpiar archivo temporal en caso de error
 		try {
 			if (existsSync(tempOutputPath)) {
@@ -208,6 +213,12 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 			// Ignorar errores de limpieza
 		}
 
+		// palettegen fails when the seek lands past the end of a short clip.
+		if (time > 0) return generateAnimatedVideoThumbnailFFmpeg(videoPath, { ...options, time: 0 });
+
+		logger.error('Error generando thumbnail animado con FFmpeg.', {
+			errorKind: error instanceof Error ? error.name : 'UnknownError',
+		});
 		return null;
 	}
 }

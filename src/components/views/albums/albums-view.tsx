@@ -16,6 +16,7 @@ export function AlbumsView(_props: ViewProps) {
 	const isLoading = useAlbumStore((s) => s.isLoading);
 	const error = useAlbumStore((s) => s.error);
 	const loadAlbums = useAlbumStore((s) => s.loadAlbums);
+	const lastUpdated = useAlbumStore((s) => s.lastUpdated);
 	const getSortedAlbums = useAlbumStore((s) => s.getSortedAlbums);
 	const setCurrentAlbumId = useAlbumStore((s) => s.setCurrentAlbumId);
 	const { mutate: createAlbum } = useCreateAlbum();
@@ -27,12 +28,13 @@ export function AlbumsView(_props: ViewProps) {
 	const [albumName, setAlbumName] = useState('');
 	const [albumDescription, setAlbumDescription] = useState('');
 
+	// Load once per store lifetime: an empty library also yields an empty record, so emptiness cannot be the signal.
 	useEffect(() => {
-		if (Object.keys(albumsRecord).length === 0) {
-			viewLogger.info('Album store is empty, loading from the server...');
+		if (lastUpdated === null) {
+			viewLogger.info('Album store has not loaded yet, loading from the server...');
 			loadAlbums();
 		}
-	}, [loadAlbums, albumsRecord]);
+	}, [loadAlbums, lastUpdated]);
 
 	const handleAlbumClick = useCallback(
 		(album: AlbumWithStats) => {
@@ -50,11 +52,14 @@ export function AlbumsView(_props: ViewProps) {
 		setShowForm(true);
 	}, []);
 
+	// The view reads the album store; React Query mutations do not update it, so reload after each one.
+	const reloadAlbums = useMemo(() => ({ onSuccess: () => void loadAlbums() }), [loadAlbums]);
+
 	const handleDeleteAlbum = useCallback(
 		(albumId: string) => {
-			deleteAlbum(albumId);
+			deleteAlbum(albumId, reloadAlbums);
 		},
-		[deleteAlbum]
+		[deleteAlbum, reloadAlbums]
 	);
 
 	const handleSubmitForm = useCallback(() => {
@@ -68,25 +73,28 @@ export function AlbumsView(_props: ViewProps) {
 		}
 
 		if (editingAlbum) {
-			updateAlbum({ id: editingAlbum.id, data: { name: albumName, description: albumDescription } });
+			updateAlbum({ id: editingAlbum.id, data: { name: albumName, description: albumDescription } }, reloadAlbums);
 		} else {
-			createAlbum({
-				name: albumName,
-				description: albumDescription,
-				emoji: '📸',
-				color: DEFAULT_ENTITY_COLOR,
-				filters: '[]',
-				sortBy: 'name',
-				featuredImage: undefined,
-				shortcut: undefined,
-				category: undefined,
-			});
+			createAlbum(
+				{
+					name: albumName,
+					description: albumDescription,
+					emoji: '📸',
+					color: DEFAULT_ENTITY_COLOR,
+					filters: '[]',
+					sortBy: 'name',
+					featuredImage: undefined,
+					shortcut: undefined,
+					category: undefined,
+				},
+				reloadAlbums
+			);
 		}
 		setAlbumName('');
 		setAlbumDescription('');
 		setEditingAlbum(null);
 		setShowForm(false);
-	}, [albumName, albumDescription, editingAlbum, createAlbum, updateAlbum]);
+	}, [albumName, albumDescription, editingAlbum, createAlbum, updateAlbum, reloadAlbums]);
 
 	const sortedAlbums = useMemo(() => {
 		viewLogger.info('Recalculando sortedAlbums. Registros:', Object.keys(albumsRecord).length);

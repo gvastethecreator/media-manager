@@ -85,7 +85,7 @@ export function PromptCardImages({
 								{activeImage && (
 									<div className="relative h-full w-full overflow-hidden">
 										<img
-											alt="Featured image"
+											alt="Featured"
 											className={cn(
 												'h-full w-full object-cover',
 												tcgMode && 'transition-transform duration-dt-slow ease-dt-out hover:scale-110'

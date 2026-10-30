@@ -11,6 +11,7 @@ import {
 	Copy,
 	Download,
 	Eye,
+	FolderInput,
 	FolderOpen,
 	Hash,
 	Heart,
@@ -24,8 +25,9 @@ import {
 	Users,
 	Wand2,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { type EntityOption, useContextMenuEntities } from '@/hooks/use-context-menu-entities';
+import { toMediaAssetType } from '@/lib/api/authorized-roots';
 import { cn } from '@/lib/utils';
 import type { BrowserItem } from '../types/item.types';
 
@@ -89,6 +91,8 @@ interface MenuItemProps {
 	submenu?: React.ReactNode;
 }
 
+const VIEWPORT_MARGIN = 8;
+
 function MenuItem({
 	icon,
 	label,
@@ -147,6 +151,18 @@ function MenuItem({
 		setOpen(true);
 	}, []);
 
+	// Keep the submenu inside the viewport: flip left at the right edge, shift up at the bottom edge.
+	useLayoutEffect(() => {
+		const el = subMenuRef.current;
+		if (!(el && open)) return;
+		el.style.top = '';
+		el.classList.remove('right-full', 'mr-1');
+		const rect = el.getBoundingClientRect();
+		const overflowY = rect.bottom - (window.innerHeight - VIEWPORT_MARGIN);
+		if (overflowY > 0) el.style.top = `${-Math.min(overflowY, rect.top - VIEWPORT_MARGIN)}px`;
+		if (rect.right > window.innerWidth - VIEWPORT_MARGIN) el.classList.add('right-full', 'mr-1');
+	}, [open]);
+
 	useEffect(() => {
 		if (!submenu) return;
 		const el = subMenuRef.current;
@@ -183,7 +199,7 @@ function MenuItem({
 			{submenu && (
 				<div
 					className={cn(
-						'absolute top-0 left-full z-50 ml-1',
+						'absolute top-0 z-50 [&:not(.right-full)]:left-full [&:not(.right-full)]:ml-1',
 						open ? 'visible opacity-100' : 'invisible opacity-0',
 						'transition-all duration-dt-fast ease-dt-out'
 					)}
@@ -410,6 +426,7 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 	const supportsTagging = singleEntityType === 'image' || singleEntityType === 'video';
 	const supportsFavorites = singleEntityType !== null;
 	const hasAddTargets = supportsImageTargets || supportsTagging || supportsFavorites;
+	const canMove = selectedItems.some((item) => toMediaAssetType(item.entityType) !== null);
 
 	// Cerrar menú al hacer click fuera o presionar Escape
 	useEffect(() => {
@@ -435,6 +452,14 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 			document.removeEventListener('keydown', handleEscape);
 		};
 	}, [isOpen, onClose]);
+
+	useLayoutEffect(() => {
+		const el = menuRef.current;
+		if (!(el && isOpen && position)) return;
+		const rect = el.getBoundingClientRect();
+		el.style.left = `${Math.max(VIEWPORT_MARGIN, Math.min(position.x, window.innerWidth - rect.width - VIEWPORT_MARGIN))}px`;
+		el.style.top = `${Math.max(VIEWPORT_MARGIN, Math.min(position.y, window.innerHeight - rect.height - VIEWPORT_MARGIN))}px`;
+	}, [isOpen, position]);
 
 	if (!isOpen) {
 		return null;
@@ -568,7 +593,7 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 
 	return (
 		<div
-			className="fixed z-50 min-w-64 rounded-dt-md border-2 border-border/50 bg-linear-to-b from-popover to-popover/98 p-1 text-popover-foreground shadow-dt-3"
+			className="fixed z-[60] min-w-64 rounded-dt-md border-2 border-border/50 bg-linear-to-b from-popover to-popover/98 p-1 text-popover-foreground shadow-dt-3"
 			ref={menuRef}
 			style={{
 				left: position.x,
@@ -606,6 +631,13 @@ export function ItemContextMenu({ isOpen, position, selectedItems, onAction, onC
 
 					<MenuSeparator />
 
+					<MenuItem
+						action="move"
+						disabled={!canMove}
+						icon={<FolderInput className="h-4 w-4" />}
+						label="Move to…"
+						onSelect={handleSelect}
+					/>
 					<MenuItem
 						action="download"
 						icon={<Download className="h-4 w-4" />}

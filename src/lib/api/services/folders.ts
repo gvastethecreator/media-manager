@@ -155,6 +155,10 @@ export const findFolders = async (filters: FolderFilters): Promise<FoldersRespon
 	if (filters.limit) {
 		queryParams.append('limit', filters.limit.toString());
 	}
+	if (filters.offset) queryParams.append('offset', filters.offset.toString());
+	if (filters.search) queryParams.append('search', filters.search);
+	if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+	if (filters.sortOrder) queryParams.append('sortOrder', filters.sortOrder);
 
 	const queryString = queryParams.toString();
 	const url = queryString ? `/folders?${queryString}` : '/folders';
@@ -245,6 +249,8 @@ export const toggleFolderFavorite = async (id: string): Promise<FolderWithStats>
 };
 
 export interface ReindexFolderResponse {
+	/** True when the user stopped the run; indexed folders are kept and a new run finishes the rest. */
+	cancelled?: boolean;
 	folderId: string;
 	phases: unknown;
 	success: boolean;
@@ -256,6 +262,9 @@ export const reindexFolder = async (id: string): Promise<ReindexFolderResponse> 
 	const response = await apiClient.post<ReindexFolderResponse>(`/folders/${id}/reindex`);
 	return response;
 };
+
+export const cancelFolderReindex = async (id: string): Promise<{ cancelled: boolean }> =>
+	apiClient.post<{ cancelled: boolean }>(`/folders/${encodeURIComponent(id)}/reindex/cancel`);
 
 export const getRecentFolderImages = async (
 	folderId: string,

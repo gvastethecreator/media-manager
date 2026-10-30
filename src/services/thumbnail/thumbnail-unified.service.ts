@@ -20,6 +20,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { visibleImageLifecycleCondition } from '@/services/image/image-lifecycle-query';
 import { generateAndSaveWaveform } from '@/lib/utils/audio/waveform-generator';
 import { generateStaticVideoThumbnailFFmpeg } from '@/lib/utils/video/ffmpeg-thumbnails';
+import { detectVideoThumbnailMimeType } from '@/services/folder/folder-preview-media.service';
 
 const logger = serverLogger.withContext('ThumbnailUnified');
 
@@ -411,10 +412,11 @@ class ThumbnailUnifiedService {
 				});
 
 				if (video?.thumbnail) {
+					const data = Buffer.from(video.thumbnail, 'base64');
 					return {
 						success: true,
-						data: Buffer.from(video.thumbnail, 'base64'),
-						mimeType: video.thumbnailMimeType || 'image/webp',
+						data,
+						mimeType: detectVideoThumbnailMimeType(data),
 						width: video.thumbnailWidth || DEFAULT_DIMENSIONS.video.width,
 						height: video.thumbnailHeight || DEFAULT_DIMENSIONS.video.height,
 					};

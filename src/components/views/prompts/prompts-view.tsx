@@ -96,7 +96,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 		return (
 			<div className="flex h-full items-center justify-center">
 				<div className="flex flex-col items-center gap-3">
-					<Spinner size="lg" />
+					<Spinner className="size-8" />
 					<p className="text-muted-foreground text-sm">Loading prompts...</p>
 				</div>
 			</div>

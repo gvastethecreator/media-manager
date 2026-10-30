@@ -89,7 +89,8 @@ describe('canonical Video HTTP lifecycle', () => {
 			.where(eq(videos.id, response.body.id));
 		const thumbnail = await request(app).get(`/api/videos/${response.body.id}/thumbnail`);
 		expect(thumbnail.status).toBe(200);
-		expect(thumbnail.headers['content-type']).toContain('image/jpeg');
+		// The Video table has no MIME column: the type follows the stored bytes, with WebP as the default.
+		expect(thumbnail.headers['content-type']).toContain('image/webp');
 		expect(Buffer.from(thumbnail.body).toString('utf8')).toBe('thumbnail');
 
 		const rawPath = await request(app)

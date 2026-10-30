@@ -376,6 +376,12 @@ function MediaThumbnailInner({
 		[viewportHook.ref, baseViewport.ref]
 	);
 
+	// A source that fails to decode (corrupt file, failed generation) shows the type icon instead of a blank tile.
+	const handleImageError = () => {
+		const fallback = getFallbackIcon(item.entityType);
+		if (validSrc !== fallback) setSrc(fallback);
+	};
+
 	if (error) {
 		return (
 			<div className={cn(baseClass, 'flex items-center justify-center bg-muted text-muted-foreground text-xs')}>
@@ -390,6 +396,7 @@ function MediaThumbnailInner({
 				alt={item.name}
 				className={cn(baseClass, imgClassName)}
 				loading="lazy"
+				onError={handleImageError}
 				onLoad={() => setIsLoaded(true)}
 				src={validSrc}
 				style={baseStyle}
@@ -411,7 +418,7 @@ function MediaThumbnailInner({
 	}
 
 	if (isVideo) {
-		const badgeInfo = getBadgeInfo(item.entityType);
+		const badgeInfo = getBadgeInfo(item.entityType, item.mimeType);
 		const badgeClasses = getBadgeClasses(imgProps.width as number, imgProps.height as number);
 
 		return (
@@ -426,6 +433,7 @@ function MediaThumbnailInner({
 					loading="lazy"
 					onBlur={() => setHovered(false)}
 					onFocus={() => setHovered(true)}
+					onError={handleImageError}
 					onLoad={() => setIsLoaded(true)}
 					onMouseEnter={() => setHovered(true)}
 					onMouseLeave={() => setHovered(false)}
@@ -446,7 +454,7 @@ function MediaThumbnailInner({
 		);
 	}
 
-	const badgeInfo = getBadgeInfo(item.entityType);
+	const badgeInfo = getBadgeInfo(item.entityType, item.mimeType);
 	const badgeClasses = getBadgeClasses(imgProps.width as number, imgProps.height as number);
 
 	return (
@@ -457,6 +465,7 @@ function MediaThumbnailInner({
 				loading="lazy"
 				onBlur={() => setHovered(false)}
 				onFocus={() => setHovered(true)}
+				onError={handleImageError}
 				onLoad={() => setIsLoaded(true)}
 				onMouseEnter={() => setHovered(true)}
 				onMouseLeave={() => setHovered(false)}
@@ -522,7 +531,13 @@ function getFallbackIcon(entityType: MediaItem['entityType']): string {
 	}
 }
 
-function getBadgeInfo(entityType: MediaItem['entityType']) {
+const DOCUMENT_BADGES: Record<string, string> = {
+	'application/pdf': 'PDF',
+	'text/markdown': 'MD',
+	'text/plain': 'TXT',
+};
+
+function getBadgeInfo(entityType: MediaItem['entityType'], mimeType?: string | null) {
 	switch (entityType) {
 		case 'folder':
 			return { text: 'DIR', color: 'var(--entity-folder)', title: 'Folder' };
@@ -531,7 +546,11 @@ function getBadgeInfo(entityType: MediaItem['entityType']) {
 		case 'audio':
 			return { text: 'AUD', color: 'var(--entity-audio)', title: 'Audio File' };
 		case 'document':
-			return { text: 'PDF', color: 'var(--entity-document)', title: 'Document File' };
+			return {
+				text: (mimeType && DOCUMENT_BADGES[mimeType]) || 'DOC',
+				color: 'var(--entity-document)',
+				title: 'Document File',
+			};
 		case 'jsonFile':
 			return { text: 'JSON', color: 'var(--entity-json)', title: 'JSON File' };
 		case 'file3d':

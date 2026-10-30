@@ -84,7 +84,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 				{/* Imagen principal */}
 				{!isLargeDataUrl(featuredImage) && (
 					<img
-						alt="Featured image"
+						alt="Featured"
 						className="h-full w-full object-cover"
 						onError={(e) => {
 							// fallback: ocultar img si falla y usar fondo liso
@@ -149,7 +149,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 					>
 						{!isLargeDataUrl(image) && (
 							<img
-								alt={`Recent image ${index + 1}`}
+								alt={`Recent item ${index + 1}`}
 								className="h-full w-full object-cover"
 								onError={(e) => {
 									const el = e.currentTarget as HTMLImageElement;

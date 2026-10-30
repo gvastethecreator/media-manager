@@ -6,6 +6,7 @@ import { eq, inArray } from 'drizzle-orm';
 import express from 'express';
 import request from 'supertest';
 import { db } from '../src/lib/drizzle';
+import { generateStaticVideoThumbnailFFmpeg } from '../src/lib/utils/video/ffmpeg-thumbnails';
 import {
 	assets,
 	audios,
@@ -297,7 +298,8 @@ describe('media specialization thumbnail stats', () => {
 
 		const videoThumbnail = await request(app).get(`/api/videos/${videoId}/thumbnail`);
 		expect(videoThumbnail.status, videoThumbnail.text).toBe(200);
-		expect(videoThumbnail.headers['content-type']).toContain('image/jpeg');
+		// The Video table has no MIME column: the type follows the stored bytes, with WebP as the default.
+		expect(videoThumbnail.headers['content-type']).toContain('image/webp');
 		expect(videoThumbnail.headers['cache-control']).toBe('private, max-age=0, must-revalidate');
 		expect(videoThumbnail.headers.vary).toContain('Cookie');
 		expect(videoThumbnail.headers['x-content-type-options']).toBe('nosniff');
@@ -383,6 +385,9 @@ describe('media specialization thumbnail stats', () => {
 		);
 		const sharp = (await import('sharp')).default;
 		expect(await sharp(videoResult.data).metadata()).toEqual(expect.objectContaining({ height: 90, width: 160 }));
+		// Ingestion seeks to 5s; the 3.4s fixture must still yield a frame instead of an empty file.
+		const pastEndFrame = await generateStaticVideoThumbnailFFmpeg(videoPath, { height: 90, time: 5, width: 160 });
+		expect(pastEndFrame && (await sharp(pastEndFrame).metadata()).format).toBe('webp');
 		expect(
 			await db.query.videos.findFirst({
 				where: eq(videos.id, videoId),

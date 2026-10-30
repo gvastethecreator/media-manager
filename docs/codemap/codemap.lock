@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "source_commit": "a7bf08028aab0fafe258d4555bcf093f33e4055c",
-  "working_tree_dirty": false,
-  "generated_at": "2026-10-07T05:11:59Z",
-  "generation_id": "e640b64030aeeebde1fda162dc13cd4e8f6b7707cb41bbf6feca44c8a488c6b2",
+  "source_commit": "54a4ddc4353fdae005fc29fe368446e3ee5f2927",
+  "working_tree_dirty": true,
+  "generated_at": "2026-10-30T18:58:40Z",
+  "generation_id": "8f0ff9d1255ddf339d3bcd6e61f351b26555c4ad6d7ae49a45ed92da16a1f883",
   "analysis": {
     "version": "syntax-1",
-    "digest": "f254907343def68e42baabf08b179db9817a145bc24eaad26add0adf05d75581"
+    "digest": "ae6d608d107619ec3efae990b53b43e523c90e8f5d2c3e86ab86c9e8ec95d260"
   },
   "inventory": {
     "policy": {
@@ -172,8 +172,8 @@
         "path": "package.json",
         "origin": "tracked",
         "state": "present",
-        "digest": "3d7c66a51c198b695ae85230ec3defad0ccb528342055c4ca0ffdcb6f4498ae7",
-        "size": 8759
+        "digest": "a836414a6d5ebce86e414659d528b91d1b2232b9bbca8884f954379657b270b0",
+        "size": 8806
       },
       {
         "path": "playwright.config.ts",
@@ -662,8 +662,8 @@
         "path": "scripts/dev-vite-headers.js",
         "origin": "tracked",
         "state": "present",
-        "digest": "e36ed81378f07e962ed5713c0592cad1aed1fee1fd52675163524276c19e09be",
-        "size": 2827
+        "digest": "c0c0c5b89c8c1da0f202131140ad0871d9b19b42887095d2ab09df444e557ee9",
+        "size": 3246
       },
       {
         "path": "scripts/diagnose-thumbnails.js",
@@ -830,8 +830,8 @@
         "path": "scripts/media-specialization-thumbnail-stats.test.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "e821f15804e7621c7965a93d40c8f24028df6d8fda3aa3a0e3e0fc2d3a580af3",
-        "size": 18091
+        "digest": "5c78d88037b69a685586ad28c300054ee80456165a2495e28a836afbbcfcdb18",
+        "size": 18583
       },
       {
         "path": "scripts/metadata-http.test.ts",
@@ -893,8 +893,8 @@
         "path": "scripts/run-tests-isolated.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "2093e569dbb285a25c0dc8c80bb250c1b53ccc4c5fd755be656d9b760b7a15b1",
-        "size": 48846
+        "digest": "6549dabace00d4fbedc2c9c460bd70378b055780b699e332fec2cf30366b6703",
+        "size": 49133
       },
       {
         "path": "scripts/run-tooling-tests-isolated.ts",
@@ -1012,8 +1012,8 @@
         "path": "scripts/video-canonical-http.test.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "06a2ee0b50caa3decaefcb996eb9f21ca7ba59f681fa5f5b078b5d754968dbfe",
-        "size": 5857
+        "digest": "617bbdaad22e0a399730738ea3b6729bbf1e2b7c0687737a3f04ffcd65d7a4c0",
+        "size": 5959
       },
       {
         "path": "scripts/video-canonical-media-reference.test.ts",
@@ -1096,8 +1096,8 @@
         "path": "src/components/cards/album-card/album-card-images.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "e95e432a83bafc58a8cad8a0603901c1148d1cb2f5d9633a06c376344fb9f1e4",
-        "size": 3263
+        "digest": "5676492964be89e9894ee61058262e106f9893ec2fe38f8c53ce2d00dd85c1aa",
+        "size": 3262
       },
       {
         "path": "src/components/cards/album-card/album-card.tsx",
@@ -1306,8 +1306,8 @@
         "path": "src/components/cards/folder-card/folder-card-images.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "202afb0ccb1f2d2a639d8892a559700550e0ad712a890710688e0d52b5d86f9e",
-        "size": 9306
+        "digest": "7368269a8c7b72420364e28f3f555e52aa1cfdff45a83a82e0da4873abb2d4ee",
+        "size": 9299
       },
       {
         "path": "src/components/cards/folder-card/folder-card.tsx",
@@ -1369,8 +1369,8 @@
         "path": "src/components/cards/image-card/image-card.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "d17a05fbc3aa76390f06b0a075bd5558153eac0a0a5d0a959daf11336c9103bb",
-        "size": 2363
+        "digest": "5a1474ad61bed6c08f24b5b3bf74532c49db296ce5233ace8b7d6af435f72d7c",
+        "size": 2362
       },
       {
         "path": "src/components/cards/note-card/note-card-content.tsx",
@@ -1460,8 +1460,8 @@
         "path": "src/components/cards/prompt-card/prompt-card-images.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "ed46e68fef64114280572010a9d72b5668c7038e85fed2ebf860bd973dec523e",
-        "size": 5385
+        "digest": "e9a3577c20919579cd95e9510b6bb82b92a1e9c1fe0546391ee985d1ded6f154",
+        "size": 5379
       },
       {
         "path": "src/components/cards/prompt-card/prompt-card.tsx",
@@ -1586,8 +1586,8 @@
         "path": "src/components/cards/world-item-card/world-item-card-images.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "278b837ed5003e5581c9188acc0e88b08a463a3caef36a96dce1acdc14ff1313",
-        "size": 3440
+        "digest": "e090fd904be00443dcd62d48de30e007404f3b390d45eb8d7c3696fef68e749b",
+        "size": 3439
       },
       {
         "path": "src/components/cards/world-item-card/world-item-card.tsx",
@@ -1817,8 +1817,8 @@
         "path": "src/components/features/file-browser/components/item-context-menu.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "cd5ac3c514314cad07b79261b65437ece0c6cb41944539facc486167567475a9",
-        "size": 17133
+        "digest": "31473349dddd884ad88767cd278732d872197f624239517ada543d5ee93bfa9f",
+        "size": 18552
       },
       {
         "path": "src/components/features/file-browser/components/item-renderer.tsx",
@@ -1852,8 +1852,8 @@
         "path": "src/components/features/file-browser/components/media-thumbnail/media-thumbnail.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "b63fd1b7272c4878be9853872750ff412ea1cf2c50e340698f4611aff34ad6c1",
-        "size": 17305
+        "digest": "69e7821c4138b951d9cccb7507813ffb2e3c3e1b017b74785fe7781d5bd4d7f1",
+        "size": 17893
       },
       {
         "path": "src/components/features/file-browser/components/media-thumbnail/types.ts",
@@ -1866,8 +1866,8 @@
         "path": "src/components/features/file-browser/components/move-dialog.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "e6be7818ee17395239ad3164391cf93194fa2ae02241bc30db2723de93496d39",
-        "size": 4186
+        "digest": "973bb6ccd216a7cf5814074f6ce1e414c84f16bd4aa4ffb3924b327a7fc742a9",
+        "size": 5003
       },
       {
         "path": "src/components/features/file-browser/components/rename-dialog.tsx",
@@ -1880,8 +1880,8 @@
         "path": "src/components/features/file-browser/components/settings/file-browser-settings.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "eff29119596c041cc977848c42cd181ceb58f1f7da42989a3c8390f7b39f3216",
-        "size": 20777
+        "digest": "321ff332f1ec2cab8398812fd5772ab49b41f3593cac81cf53e8b95f0a62cee6",
+        "size": 20770
       },
       {
         "path": "src/components/features/file-browser/components/settings/settings-barrel.ts",
@@ -2027,8 +2027,8 @@
         "path": "src/components/features/file-browser/file-browser.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "70991fbb12304ff22435ed5772367fd607dba7332dda88f999e7f88a1c812945",
-        "size": 24486
+        "digest": "5ad53f8878a4cb0cc0d245b754a40babb06ec017584b2421f922430beace30f3",
+        "size": 25006
       },
       {
         "path": "src/components/features/file-browser/hooks/use-add-to-entity.ts",
@@ -2720,8 +2720,8 @@
         "path": "src/components/settings/folders/global-reindex-terminal.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "f0870445ba489b7f8350faee5cd218da04e88eb59ecb3e80042478c271179915",
-        "size": 3066
+        "digest": "4aeec5899914bbf0c9daf28cf996ddaebed6a1ad053a57a1935f0411d39408b6",
+        "size": 3988
       },
       {
         "path": "src/components/settings/folders/reindex-logs-viewer.tsx",
@@ -2909,8 +2909,8 @@
         "path": "src/components/settings/modern/files-settings-modern.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "7eee254c45776cefb938845308951f2a5d2cbd16a94a84489f4f33c4c7173580",
-        "size": 20272
+        "digest": "8cc5d2cc5f56eb1dd408a1de47660aa0ad6df4eb12fd1da4878e4af930f9380f",
+        "size": 20601
       },
       {
         "path": "src/components/settings/modern/media-settings-modern.tsx",
@@ -3699,9 +3699,9 @@
       {
         "path": "src/components/ui/switch-legacy.tsx",
         "origin": "tracked",
-        "state": "present",
-        "digest": "0c9d85a391806d60d454da6c85fdde7de0ce9f943913f18512806617ec12f404",
-        "size": 1622
+        "state": "missing",
+        "digest": null,
+        "size": 0
       },
       {
         "path": "src/components/ui/switch.tsx",
@@ -3868,8 +3868,8 @@
         "path": "src/components/views/albums/albums-view.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "6ac5127cc761f95c60df71de418369a6841d512a140c798f2b8865115291df3a",
-        "size": 3697
+        "digest": "9debb9039e07e031f8440720c81f607a2880708cd3b3af15868b4bce6de57b7c",
+        "size": 4150
       },
       {
         "path": "src/components/views/all-images/all-images-content-view.test.tsx",
@@ -3959,8 +3959,8 @@
         "path": "src/components/views/collections/collections-view.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "91beff9842675fcbc459fb4d1e54c587ab8d464058e6db9f7f6cbabf163b128b",
-        "size": 2578
+        "digest": "52a57a13f871135d23d24915faf72f9a5ac4f7c3309d41261222fa754ba7b810",
+        "size": 2957
       },
       {
         "path": "src/components/views/concepts/concept-content-view.tsx",
@@ -4029,8 +4029,8 @@
         "path": "src/components/views/favorites/favorites-view.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "1c3c23ca01314b9d5e41300978886783dc6ca4667abba6e2a61ef35f1c6e6ac4",
-        "size": 2193
+        "digest": "12d56c62c27e397402c6b663c60e6baeaa9c6353d6d61a0adffe109b588f0f39",
+        "size": 2200
       },
       {
         "path": "src/components/views/file3d/file-3d-content-view.tsx",
@@ -4204,8 +4204,8 @@
         "path": "src/components/views/prompts/prompts-view.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "00be719e75aafcef2c7da25743596012230919acacdb8d806dae1709363d028d",
-        "size": 6440
+        "digest": "f18520468252b14f542d86ce0af86a29bbf2c67b989c24e81752b009d5df6294",
+        "size": 6449
       },
       {
         "path": "src/components/views/properties/properties-content-view.test.tsx",
@@ -4547,8 +4547,8 @@
         "path": "src/hooks/use-move.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "bedbd49f9b7ebf3a2221f3a75299c183bec258b259535c7a147dc53a3c4b72f9",
-        "size": 4774
+        "digest": "cdab84a2d32e8a386d48738ab548ce27ad160a78e7261d4e3268d9036f504d00",
+        "size": 6042
       },
       {
         "path": "src/hooks/use-navigation-refresh.ts",
@@ -4645,8 +4645,8 @@
         "path": "src/lib/api/albums.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "98249c0fee586bc334930eaff5565b960189901c432bb1eea865ef50f602fdaa",
-        "size": 2917
+        "digest": "97a42d5423ca2290a08669d1904ad3abd558c00af1c699fc9dba3229bf246a0b",
+        "size": 3108
       },
       {
         "path": "src/lib/api/audio.ts",
@@ -4855,8 +4855,8 @@
         "path": "src/lib/api/collections.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "c6222d123db44261e4f5749d2d76b5e0f57522a2b8fcae5f4f13d0b55acc2b82",
-        "size": 3817
+        "digest": "9b1ecb8b621724ee6f8164551636b4595dc576ae44afb3cc466af4c0a50d3aa7",
+        "size": 4015
       },
       {
         "path": "src/lib/api/concepts.ts",
@@ -5058,8 +5058,8 @@
         "path": "src/lib/api/services/folders.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "f6c95832713015198adf25bfb292fb0d11e6c2f43ee3a3ac6f49636e7c1b377f",
-        "size": 9752
+        "digest": "35c422c57db6c9df3e5966cf761fcacb9465388f4e245c72abcbc94e050866e5",
+        "size": 10349
       },
       {
         "path": "src/lib/api/services/images.ts",
@@ -5184,8 +5184,8 @@
         "path": "src/lib/contexts/settings-context.tsx",
         "origin": "tracked",
         "state": "present",
-        "digest": "a4f6eb099f6611945b65a7b6b204684f87fa326674bb50054fcb85e6007862fa",
-        "size": 8351
+        "digest": "d3740bcf559b45f06e397393a25900a9edb5a979fa3fadcfb6d5d9863abb9f90",
+        "size": 8232
       },
       {
         "path": "src/lib/contexts/settings-copy.test.ts",
@@ -6955,8 +6955,8 @@
         "path": "src/lib/utils/profile/profile-utils.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "34edcd1befb8d5b7161f5f878f968b7abf07eaa3d09b00041cc1f04ccba42555",
-        "size": 8239
+        "digest": "9c5887e19856f8a7f1c04050e02e52144934806116c843f827532d09c712674f",
+        "size": 8169
       },
       {
         "path": "src/lib/utils/prompt/categories.ts",
@@ -7172,8 +7172,8 @@
         "path": "src/lib/utils/video/ffmpeg-thumbnails.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "5992aced7f4e22a3744ffba4294871100bc666f12d7b4d0c602d3eb0fe1a2e7e",
-        "size": 10802
+        "digest": "bcbf26945614012844ba47cb7e0965f0fbff9890aa14e61885a86e7c34fac6bc",
+        "size": 11352
       },
       {
         "path": "src/lib/utils/video/format-helpers.ts",
@@ -7410,8 +7410,8 @@
         "path": "src/server/index.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "6145a97b59dacb3f5e0bc1efe68226dc33bd446fe1f631f06fbb065080a35a32",
-        "size": 5983
+        "digest": "63aa92dfab527ba5336b4101f05e819426784e6cf4f78e89fe52ea0488f2621b",
+        "size": 6341
       },
       {
         "path": "src/server/middleware/local-api-session.ts",
@@ -7585,8 +7585,8 @@
         "path": "src/server/routes/folders.effect.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "9cb6dbab7e6274766d45e6db4b0bfc8d6aeb31b9b54a187b59795e7bd256bbf1",
-        "size": 23682
+        "digest": "c225c7cf9916d310fa38c2b0d24f163a6bf804eba21a8b8d2e64e426170c740e",
+        "size": 23236
       },
       {
         "path": "src/server/routes/images.effect.ts",
@@ -7739,8 +7739,8 @@
         "path": "src/server/routes/videos.effect.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "ec3cd392535093c7b0a378df9991564ab0376fa10054dcae517f84a718ca334b",
-        "size": 15845
+        "digest": "0a97f1593a32936ba34951964d350eda9a85a7a7ea5552a5593392b7197a87c7",
+        "size": 15964
       },
       {
         "path": "src/server/routes/worldbuilding.effect.ts",
@@ -8411,8 +8411,8 @@
         "path": "src/services/file-entity-mapper/processors/video.processor.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "6ec8ceed97089f0891b62b11640750714e8894031186aa7e235a8db2c75cde94",
-        "size": 10760
+        "digest": "3840b989fbed418a1af45ff389841f9154612f2a046248ecca11486c9611d91b",
+        "size": 10924
       },
       {
         "path": "src/services/file-entity-mapper/utils/canonical-source.utils.ts",
@@ -8558,8 +8558,8 @@
         "path": "src/services/folder/folder-preview-media.service.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "35394845cded6595fcb6bc9813583a381f9e0cd14c1ce8a7a7e2a18d11317c10",
-        "size": 3831
+        "digest": "216d3c94b7c281b160a2df53dc668ecef690aeda15e7b2bb25aff1eb405c68a3",
+        "size": 4155
       },
       {
         "path": "src/services/folder/folder-public-stats.ts",
@@ -8586,8 +8586,8 @@
         "path": "src/services/folder/reindex/canonical-folder-reindex.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "d2e1f8457effdc94c960237678aa2559060e80ae08b928d0fcd393d79dbffc5e",
-        "size": 9145
+        "digest": "85066f36eab69cf5e1f26b98069548cee9fabe676cf6acd386298359cc1116d0",
+        "size": 9763
       },
       {
         "path": "src/services/folder/reindex/folder-reindex-types.ts",
@@ -8600,8 +8600,8 @@
         "path": "src/services/folder/reindex/folder-reindex.service.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "df47ec89737b84543e9a1a59541f0b5763ebc7d7739be0503442915ace1de26d",
-        "size": 4594
+        "digest": "aa8299153152a17b376fa4456d94887600a8e51c8e05b4ddc3e6bb629f341822",
+        "size": 5891
       },
       {
         "path": "src/services/folder/reindex/reindex-incremental-types.ts",
@@ -9013,8 +9013,8 @@
         "path": "src/services/thumbnail/thumbnail-unified.service.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "b9b1bab24e3ba25b6d329e8c37cebdbe7f9497f62ed8f37d72b597b5199362c0",
-        "size": 34808
+        "digest": "37d2aa07db56bad6a0d6c0b77b52be79dd44f64557f97782ea0cbeb0baa6cad6",
+        "size": 34916
       },
       {
         "path": "src/services/thumbnail/types.ts",
@@ -10042,8 +10042,8 @@
         "path": "src/store/reindex.store.ts",
         "origin": "tracked",
         "state": "present",
-        "digest": "5fcf33c7fbc568a7c9dd790cd3ad6e4ec41f4dc18da972006956fcc74962f854",
-        "size": 919
+        "digest": "ce3471ee6742f209ae4834e838febeadf6e4b603640ad15f6959c7c6ffc62a09",
+        "size": 1177
       },
       {
         "path": "src/store/search.store.ts",
@@ -11831,12 +11831,12 @@
         "size": 9616
       }
     ],
-    "digest": "8673f14d2088709b076680857d9b43925accd71c3c8c35809394e5f430509f43"
+    "digest": "c136b592d40eeb7578cd4ada8af19f1a081a3716bf7ef17a3a2ad2ec348719d8"
   },
-  "source_digest": "2df7ab82f120af2c6b90efa999d9ad6665b73b4bdc7cab0ebc4ee8334e12b930",
+  "source_digest": "db46d1bba21548f2da85fe2a2a3fb92042f7bac436e0741163c3e5fdaaee4881",
   "artifact_hashes": {
-    "codemap.json": "5b00a412b8728f0b9d02242df93bb98f9735b3783f798c5a9a451edfc442d8ed",
-    "codemap.md": "4956f8a8395f1016d7c3ba6fa1686ee30daac24e515736fcd67e6ed9943473ef",
-    "codemap.html": "0b17e83a5b09f0dbba24a430c5abfa31c746e1d905c69ab988d15ce091710052"
+    "codemap.json": "a6e98cb34d0de8b8ce7d8167871ecd3f70186fd0e24a113ca1812f3d34344599",
+    "codemap.md": "fd37791d4dae9b2fb2eb4e6642beb67dbb2b99598d681eaea068dd440b39fcca",
+    "codemap.html": "a9777d21672b9ff9a71b2bc9fab050a6dd478d62414d7f01bfd34cea171d006f"
   }
 }

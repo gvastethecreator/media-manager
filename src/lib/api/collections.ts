@@ -94,9 +94,16 @@ export function useRecentCollectionMedia(collectionId: string, limit = 6) {
 	>({
 		queryKey: [...collectionKeys.detail(collectionId), 'media', limit],
 		queryFn: () =>
-			apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>>(
-				`/collections/${collectionId}/media?limit=${limit}`
-			),
+			// The server exposes card previews through the images endpoint.
+			apiClient
+				.get<Array<{ id: string; name?: string | null }>>(`/collections/${collectionId}/images?limit=${limit}`)
+				.then((images) =>
+					images.map((image) => ({
+						id: image.id,
+						name: image.name,
+						thumbnailUrl: `/api/images/${encodeURIComponent(image.id)}/thumbnail`,
+					}))
+				),
 		enabled: !!collectionId,
 	});
 }

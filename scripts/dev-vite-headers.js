@@ -16,13 +16,18 @@ const frontendUrl = `http://${process.env.VITE_HOST || '127.0.0.1'}:${process.en
 // Configurar variables de entorno para manejar headers grandes
 // Aumentamos a 128KB para asegurar que cookies grandes no bloqueen la carga
 process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --max-http-header-size=131072`;
-if (process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR !== '1' || !process.env.MEDIA_MANAGER_SESSION_TOKEN) {
+const isStandalone = process.env.MEDIA_MANAGER_TRUSTED_SUPERVISOR !== '1' || !process.env.MEDIA_MANAGER_SESSION_TOKEN;
+if (isStandalone) {
 	Object.assign(process.env, createLocalSessionEnvironment());
 }
 
 console.log('🚀 Iniciando Vite+ con soporte para headers grandes (128KB)...');
 console.log('🔧 NODE_OPTIONS:', process.env.NODE_OPTIONS);
-console.log('🔒 API session: isolated standalone session (use dev:full for a connected backend)');
+console.log(
+	isStandalone
+		? '🔒 API session: isolated standalone session (use dev:full for a connected backend)'
+		: '🔒 API session: shared with the dev:full backend'
+);
 
 async function waitForFrontend(url) {
 	const deadline = Date.now() + 120_000;
@@ -50,6 +55,15 @@ const viteProcess = spawn(process.execPath, ['run', 'dev:vite:app'], {
 	env: process.env,
 });
 
+// On Windows a signal reaches only `bun run`; Vite runs two node processes below it, so stop the whole tree.
+function stopVite(signal) {
+	if (process.platform === 'win32') {
+		spawn('taskkill.exe', ['/PID', String(viteProcess.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true });
+	} else {
+		viteProcess.kill(signal);
+	}
+}
+
 viteProcess.stdout.on('data', (data) => {
 	process.stdout.write(data);
 });
@@ -76,7 +90,7 @@ void waitForFrontend(frontendUrl).then((isReady) => {
 		console.log(`Frontend ready at ${frontendUrl}`);
 	} else if (!stopped) {
 		console.error('Frontend did not become ready.');
-		viteProcess.kill('SIGTERM');
+		stopVite('SIGTERM');
 		process.exitCode = 1;
 	}
 });
@@ -86,12 +100,12 @@ process.on('SIGINT', () => {
 	stopped = true;
 	requestedStop = true;
 	console.log('\n👋 Deteniendo Vite+...');
-	viteProcess.kill('SIGINT');
+	stopVite('SIGINT');
 });
 
 process.on('SIGTERM', () => {
 	stopped = true;
 	requestedStop = true;
 	console.log('\n👋 Deteniendo Vite+...');
-	viteProcess.kill('SIGTERM');
+	stopVite('SIGTERM');
 });

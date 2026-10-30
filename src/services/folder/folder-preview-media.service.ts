@@ -46,6 +46,12 @@ function detectRasterMimeType(buffer: Buffer): string | undefined {
 	return undefined;
 }
 
+/** The Video table stores no MIME column, so stored thumbnails (WebP, GIF or the SVG placeholder) are sniffed. */
+export function detectVideoThumbnailMimeType(buffer: Buffer): string {
+	if (buffer.subarray(0, 4).toString('ascii') === '<svg') return 'image/svg+xml';
+	return detectRasterMimeType(buffer) ?? 'image/webp';
+}
+
 export function toEmbeddedFolderPreviewThumbnail(raw: string | null): EmbeddedThumbnail | undefined {
 	if (!raw) return undefined;
 

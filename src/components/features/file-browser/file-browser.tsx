@@ -704,14 +704,25 @@ export function FileBrowser({
 				onCancel={() => setMoveModal({ isOpen: false, items: [] })}
 				onConfirm={(targetFolderId) => {
 					void (async () => {
-						const assets = moveModal.items.map((item) => {
+						const sourceFolderIds: Record<string, string> = {};
+						const assets = moveModal.items.flatMap((item) => {
 							const assetType = toMediaAssetType(item.entityType);
-							if (!assetType) throw new Error(`Cannot move entity type ${item.entityType}`);
-							return { assetId: item.id, assetType };
+							if (!assetType) return [];
+							const folderId = item.raw?.folderId;
+							if (typeof folderId === 'string') sourceFolderIds[item.id] = folderId;
+							return [{ assetId: item.id, assetType }];
 						});
-						await moveFiles({ assets, targetFolderId });
+						const skipped = moveModal.items.length - assets.length;
+						if (skipped > 0) {
+							toast({
+								title: 'Some items were not moved',
+								description: `${skipped} ${skipped === 1 ? 'item is' : 'items are'} not a movable file (folders cannot be moved).`,
+							});
+						}
+						if (assets.length > 0) await moveFiles({ assets, sourceFolderIds, targetFolderId });
 						setMoveModal({ isOpen: false, items: [] });
 					})().catch((error) => {
+						// useMove already reports the failure in a toast.
 						clientLogger.error('File browser move failed:', error);
 					});
 				}}

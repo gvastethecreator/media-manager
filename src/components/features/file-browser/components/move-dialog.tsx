@@ -5,6 +5,7 @@
 
 import { FolderIcon, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -14,6 +15,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { useFolders } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import type { FolderWithStats } from '@/types/entities/folder';
@@ -34,17 +36,29 @@ export interface MoveDialogProps {
 
 export function MoveDialog({ isOpen, items, onConfirm, onCancel, isLoading = false }: MoveDialogProps) {
 	const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
-	const { data: foldersResponse, isLoading: foldersLoading } = useFolders({
-		limit: 100,
-		sortBy: 'name',
-		sortOrder: 'asc',
-	});
-	const folders = foldersResponse?.data;
+	const [search, setSearch] = useState('');
+	const [debouncedSearch] = useDebounce(search.trim(), 250);
+	const { data: foldersResponse, isLoading: foldersLoading } = useFolders(
+		{
+			limit: 200,
+			search: debouncedSearch || undefined,
+			sortBy: 'name',
+			sortOrder: 'asc',
+		},
+		{ enabled: isOpen }
+	);
+	// Moving into the folder every item already lives in is a no-op, so hide it.
+	const sourceFolderIds = new Set(items.map((item) => item.raw?.folderId));
+	const currentFolderId = sourceFolderIds.size === 1 ? [...sourceFolderIds][0] : undefined;
+	const folders = foldersResponse?.data.filter((folder: FolderWithStats) => folder.id !== currentFolderId);
 
 	const itemCount = items.length;
 
 	useEffect(() => {
-		if (isOpen) setSelectedFolderId(null);
+		if (isOpen) {
+			setSelectedFolderId(null);
+			setSearch('');
+		}
 	}, [isOpen]);
 
 	return (
@@ -59,6 +73,13 @@ export function MoveDialog({ isOpen, items, onConfirm, onCancel, isLoading = fal
 				</DialogHeader>
 
 				<div className="py-4">
+					<Input
+						aria-label="Filter destination folders"
+						className="mb-3"
+						onChange={(event) => setSearch(event.target.value)}
+						placeholder="Filter folders by name"
+						value={search}
+					/>
 					{/* Lista de carpetas */}
 					<div className="max-h-[300px] overflow-y-auto rounded-lg border">
 						{foldersLoading ? (

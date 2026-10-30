@@ -86,7 +86,7 @@ export function AlbumCardImages({
 					className={cn('relative overflow-hidden rounded bg-background/20', index < 3 && 'border-border/40 border-b')}
 					key={`album-img-${index}-${imgSrc.substring(imgSrc.lastIndexOf('/') + 1)}`}
 				>
-					<img alt={`Album image ${index + 1}`} className="h-full w-full object-cover" src={imgSrc} />
+					<img alt={`Album item ${index + 1}`} className="h-full w-full object-cover" src={imgSrc} />
 					{/* Indicador de video */}
 					{videos.includes(imgSrc) && (
 						<div className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-muted/50">

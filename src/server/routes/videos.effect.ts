@@ -7,6 +7,7 @@
 
 import { Effect } from 'effect';
 import express from 'express';
+import { detectVideoThumbnailMimeType } from '@/services/folder/folder-preview-media.service';
 import { persistGeneratedVideoThumbnail } from '@/services/video/video-thumbnail-persist.service';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -486,7 +487,7 @@ router.get(
 					try {
 						const buffer = Buffer.from(video.thumbnail, 'base64');
 						res.set({
-							'Content-Type': 'image/jpeg',
+							'Content-Type': detectVideoThumbnailMimeType(buffer),
 							'Content-Length': buffer.length.toString(),
 						});
 						setAuthorizedAssetCacheHeaders(res, 'revalidate');

@@ -706,6 +706,7 @@ router.post(
 
 			res.json({
 				success: result.success,
+				cancelled: result.cancelled,
 				folderId,
 				phases: result.phases,
 				summary: result.summary,
@@ -716,6 +717,13 @@ router.post(
 		})
 	)
 );
+
+/**
+ * POST /folders/:id/reindex/cancel - Stop a running reindex after the folder being synced
+ */
+router.post('/:id/reindex/cancel', authorizeFolderPathById('index'), (req, res) => {
+	res.json({ cancelled: reindexService.cancel(req.params.id) });
+});
 
 /**
  * POST /folders/reindex - Iniciar reindexado de carpetas

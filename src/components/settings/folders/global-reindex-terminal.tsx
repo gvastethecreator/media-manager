@@ -1,4 +1,6 @@
-import { Maximize2, Minimize2, Terminal, X } from 'lucide-react';
+import { Maximize2, Minimize2, Square, Terminal, X } from 'lucide-react';
+import { cancelFolderReindex } from '@/lib/api/services/folders';
+import { toastService } from '@/lib/ui/toast';
 import { useReindexStore } from '@/store/reindex.store';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,7 +9,21 @@ import { cn } from '@/lib/utils';
 import { useState, useRef } from 'react';
 
 export function GlobalReindexTerminal() {
-	const { isOpen, isMinimized, toggleMinimized, close } = useReindexStore();
+	const { isOpen, isMinimized, runningFolderId, toggleMinimized, close } = useReindexStore();
+	const [isStopping, setIsStopping] = useState(false);
+
+	const handleStop = () => {
+		if (!runningFolderId) return;
+		setIsStopping(true);
+		cancelFolderReindex(runningFolderId)
+			.then(({ cancelled }) => {
+				if (cancelled) toastService.info('Stopping after the current folder…');
+			})
+			.catch((error) =>
+				toastService.error(`Could not stop the reindex: ${error instanceof Error ? error.message : error}`)
+			)
+			.finally(() => setIsStopping(false));
+	};
 
 	// Guardamos el progreso localmente para mostrarlo en la píldora.
 	const [localProgress, setLocalProgress] = useState(0);
@@ -29,6 +45,18 @@ export function GlobalReindexTerminal() {
 						<span className="font-mono text-sm font-semibold">Reindex Terminal</span>
 					</div>
 					<div className="flex items-center gap-1">
+						{runningFolderId && (
+							<Button
+								className="h-6 gap-1 rounded-sm px-2 text-xs"
+								disabled={isStopping}
+								onClick={handleStop}
+								size="sm"
+								variant="ghost"
+							>
+								<Square className="h-3 w-3" />
+								{isStopping ? 'Stopping…' : 'Stop'}
+							</Button>
+						)}
 						<Button
 							aria-label={isMinimized ? 'Expand reindex terminal' : 'Minimize reindex terminal'}
 							variant="ghost"

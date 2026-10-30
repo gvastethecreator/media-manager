@@ -8,7 +8,7 @@ import FavoritesContentView from './favorites-content-view';
 
 const viewLogger = clientLogger.withContext('FavoritesView');
 
-export function FavoritesView({ isVisible }: ViewProps) {
+export function FavoritesView({ isVisible = true }: ViewProps) {
 	// Usar selectores normales de Zustand
 	const selectedIds = useFavoriteStore((state) => state.selectedIds) || [];
 	const selectFavorite = useFavoriteStore((state) => state.selectFavorite);

@@ -15,7 +15,7 @@
 		"desktop:inventory": "bun scripts/write-extraresources-inventory.ts",
 		"build": "bun run build:vite && bun run build:server",
 		"build:vite": "bun scripts/run-with-log.js build-vite bun scripts/build-vite.ts",
-		"build:server": "bun scripts/run-with-log.js build-server bun build src/server/index.ts --outdir dist/server --target bun",
+		"build:server": "bun scripts/run-with-log.js build-server bun build src/server/index.ts --outdir dist/server --target bun --define 'process.env.NODE_ENV=\"production\"'",
 		"desktop:package": "bun run build && bun run desktop:build-shell && bun run desktop:prepare-resources && bun run desktop:inventory && bun scripts/desktop-package.ts",
 		"desktop:make": "electron-forge make",
 		"start": "bun scripts/start-production.ts",

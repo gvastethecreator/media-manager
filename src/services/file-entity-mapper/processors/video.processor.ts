@@ -179,8 +179,9 @@ export class VideoProcessor {
 
 			// Validar que el buffer sea un WebP válido
 			const header = animatedWebpBuffer.slice(0, 4).toString('ascii');
-			if (header !== 'RIFF') {
-				throw new Error('Buffer no es un WebP válido');
+			// The FFmpeg fallback returns GIF; served MIME is sniffed from the bytes.
+			if (header !== 'RIFF' && header !== 'GIF8') {
+				throw new Error('Buffer no es un WebP ni GIF válido');
 			}
 
 			return animatedWebpBuffer;
@@ -289,7 +290,7 @@ export class VideoProcessor {
 		db: any
 	): Promise<{ success: boolean; error?: string }> {
 		const { basename } = await import('node:path');
-		const fileName = basename(filePath);
+		const fileName = basename(filePath).replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
 
 		// Obtener metadata del video para mostrar en placeholder
 		const video = await db.query.videos.findFirst({

@@ -23,9 +23,14 @@ interface FolderRow {
 export interface CanonicalFolderReindexContext {
 	afterFolderAuthorization?: (folderId: string) => Promise<void>;
 	authorizedRootRegistry: AuthorizedRootRegistry;
+	/** Reported after each physical folder is synced. */
+	onFolderSynced?: (processed: number, total: number) => Promise<void> | void;
+	/** Checked between folders: each folder sync commits on its own, so stopping there leaves a resumable state. */
+	signal?: AbortSignal;
 }
 
 export interface CanonicalFolderReindexResult {
+	cancelled: boolean;
 	errors: string[];
 	filesIndexed: number;
 	foldersProcessed: number;
@@ -169,10 +174,16 @@ export async function executeCanonicalFolderReindex(
 	);
 	const errors: string[] = [];
 	let filesIndexed = 0;
+	let foldersProcessed = 0;
+	let cancelled = false;
 	const newFolderIds = new Set(structure.newFolderIds);
 	const insertedFolderIds: string[] = [];
 	try {
 		for (const folder of structure.physicalFolders) {
+			if (context.signal?.aborted) {
+				cancelled = true;
+				break;
+			}
 			if (newFolderIds.has(folder.id)) {
 				await db.insert(folders).values(folder);
 				insertedFolderIds.push(folder.id);
@@ -186,8 +197,11 @@ export async function executeCanonicalFolderReindex(
 			filesIndexed += sync.stats.newFilesFound;
 			errors.push(...sync.errors);
 			await recomputeAndPersistFolderAggregates(folder.id);
+			foldersProcessed++;
+			await context.onFolderSynced?.(foldersProcessed, structure.physicalFolders.length);
 		}
-		for (const missingFolderId of structure.missingFolderIds) {
+		// A cancelled run has not observed every folder, so it must not mark any as missing.
+		for (const missingFolderId of cancelled ? [] : structure.missingFolderIds) {
 			const now = new Date();
 			await db
 				.update(sourceFiles)
@@ -209,19 +223,20 @@ export async function executeCanonicalFolderReindex(
 		throw error;
 	}
 
-	logger.info('Reindex canónico completado', {
+	logger.info(cancelled ? 'Reindex canónico cancelado' : 'Reindex canónico completado', {
 		errors: errors.length,
 		filesIndexed,
 		folderId: rootFolder.id,
-		foldersProcessed: structure.physicalFolders.length,
+		foldersProcessed,
 		missingFolders: structure.missingFolderIds.length,
 		newFolders: structure.newFolders,
 		totalFilesObserved: scan.totalFiles,
 	});
 	return {
+		cancelled,
 		errors,
 		filesIndexed,
-		foldersProcessed: structure.physicalFolders.length,
+		foldersProcessed,
 		missingFolders: structure.missingFolderIds.length,
 		newFolders: structure.newFolders,
 		totalFilesObserved: scan.totalFiles,

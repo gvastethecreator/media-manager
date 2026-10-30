@@ -20,6 +20,7 @@ export interface StructuredReindexContext {
 }
 
 export interface StructuredReindexResult {
+	cancelled: boolean;
 	phases: Record<string, ReindexPhaseResult>;
 	success: boolean;
 	summary: {
@@ -44,6 +45,7 @@ const phase = (
 export class FolderReindexService {
 	private static instance: FolderReindexService;
 	private readonly logger = serverLogger.withContext('FolderReindexService');
+	private readonly activeReindexes = new Map<string, AbortController>();
 
 	static getInstance(): FolderReindexService {
 		FolderReindexService.instance ??= new FolderReindexService();
@@ -62,9 +64,24 @@ export class FolderReindexService {
 		if (options.emitEvents !== false)
 			await this.emitProgress(options.folderId, 'starting', 0, 'Iniciando reindex canónico...');
 
+		const controller = new AbortController();
+		if (options.folderId) this.activeReindexes.set(options.folderId, controller);
 		try {
-			const result = await executeCanonicalFolderReindex(options, context);
-			const success = result.errors.length === 0;
+			const result = await executeCanonicalFolderReindex(options, {
+				...context,
+				onFolderSynced:
+					options.emitEvents === false
+						? undefined
+						: (processed, total) =>
+								this.emitProgress(
+									options.folderId,
+									'indexing',
+									Math.min(99, Math.round((processed / Math.max(1, total)) * 100)),
+									`Indexed ${processed} of ${total} folders`
+								),
+				signal: controller.signal,
+			});
+			const success = result.errors.length === 0 && !result.cancelled;
 			const phases: Record<string, ReindexPhaseResult> = {
 				analysis: phase(result.foldersProcessed + result.missingFolders),
 				existence: phase(result.foldersProcessed + result.missingFolders),
@@ -87,14 +104,24 @@ export class FolderReindexService {
 			};
 			const totalDuration = Date.now() - startTime;
 			if (options.emitEvents !== false) {
-				await this.emitProgress(
-					options.folderId,
-					success ? 'completed' : 'error',
-					success ? 100 : 0,
-					success ? 'Reindex canónico completado' : 'El reindex canónico terminó con errores'
-				);
+				if (result.cancelled) {
+					await this.emitProgress(
+						options.folderId,
+						'cancelled',
+						100,
+						`Reindex stopped after ${result.foldersProcessed} folders; run it again to finish`
+					);
+				} else {
+					await this.emitProgress(
+						options.folderId,
+						success ? 'completed' : 'error',
+						success ? 100 : 0,
+						success ? 'Reindex canónico completado' : 'El reindex canónico terminó con errores'
+					);
+				}
 			}
 			return {
+				cancelled: result.cancelled,
 				phases,
 				success,
 				summary: {
@@ -111,7 +138,18 @@ export class FolderReindexService {
 			if (options.emitEvents !== false)
 				await this.emitProgress(options.folderId, 'error', 0, 'El reindex canónico falló');
 			throw error;
+		} finally {
+			if (options.folderId && this.activeReindexes.get(options.folderId) === controller)
+				this.activeReindexes.delete(options.folderId);
 		}
+	}
+
+	/** Requests a stop after the folder being synced. Returns false when no reindex is running for the folder. */
+	cancel(folderId: string): boolean {
+		const controller = this.activeReindexes.get(folderId);
+		if (!controller) return false;
+		controller.abort();
+		return true;
 	}
 
 	private async emitProgress(

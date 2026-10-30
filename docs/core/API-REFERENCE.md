@@ -40,10 +40,13 @@ Base: `/api/folders`
 - `GET /:id/files/stats`
 - `GET /:id/preview`
 - `POST /:id/reindex`
+- `POST /:id/reindex/cancel`
 
 This family covers folder navigation, structure, previews, content, and reindexing by authorized folder ID.
 
-`POST /api/folders/:id/reindex` requires an authorized folder with index permission. It returns `400` with `UNSUPPORTED_REINDEX_OPTION` if `skipThumbnails` or `skipMetadata` is `true`.
+`POST /api/folders/:id/reindex` requires an authorized folder with index permission. It returns `400` with `UNSUPPORTED_REINDEX_OPTION` if `skipThumbnails` or `skipMetadata` is `true`. It emits `folder:progress` events after each physical folder and returns `cancelled: true` when the run was stopped.
+
+`POST /api/folders/:id/reindex/cancel` stops a running reindex after the folder being synced and returns `{ cancelled }`. Each folder sync commits on its own, so a stopped run keeps the folders already indexed and does not mark unvisited folders as missing; the next reindex finishes the rest.
 
 Retired reindex endpoints return `410`:
 
